@@ -1,39 +1,55 @@
 # 작성 에디터 버전 : 2022.3.60f1
 
-🎰 Roulette Game
-Unity로 처음 만든 아주 단순한 2D 랜덤 룰렛 프로젝트입니다.
+🚗 Swipe Car Game
+Unity로 만든 마우스 스와이프 기반 2D 자동차 이동 프로젝트입니다.
 
 ---
 
 ## 📌 프로젝트 소개
-2022년 Unity를 처음 배우면서 제작한 연습용 프로젝트입니다.  
-마우스 클릭으로 룰렛을 회전시키고, 감속을 통해 자연스럽게 멈추는 기본 회전 로직을 구현했습니다.
+마우스 스와이프 입력을 이용해 자동차를 이동시키는 간단한 물리 기반 2D 게임입니다.  
+스와이프 길이에 따라 이동 속도가 결정되고, 감속을 통해 자연스럽게 멈추는 구조로 구현했습니다.
 
 ---
 
 ## 🎮 현재 구현된 기능
-- 마우스 왼쪽 클릭으로 룰렛 회전 시작
-- 회전 속도 점점 감소 (rotSpeed *= 0.96f)
-- 자연스럽게 멈추는 감속 효과 구현
-- 고정된 화살표 기준으로 결과 확인 가능
+- 마우스 드래그 기반 스와이프 입력 감지
+- 스와이프 거리 기반 속도 계산
+- 자연스러운 감속 효과 (speed *= 0.98f)
+- 목표 지점까지 거리 UI 표시
+- 이동 시 효과음 재생
 
 ---
 
-## 🧠 주요 스크립트 (RouletController.cs)
+## 🧠 주요 스크립트 (CarController + UI 포함)
 
 ```csharp
-public class RouletController : MonoBehaviour
+public class CarController : MonoBehaviour
 {
-    float rotSpeed = 0f;
+    GameObject flag;
+    float speed = 0;
+    Vector2 startPos;
+
+    void Start()
+    {
+        this.flag = GameObject.Find("flag");
+    }
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))     // 마우스 왼쪽 클릭
+        if (Input.GetMouseButtonDown(0))
         {
-            rotSpeed = 10f;
+            this.startPos = Input.mousePosition;
+        }
+        else if (Input.GetMouseButtonUp(0))
+        {
+            Vector2 endPos = Input.mousePosition;
+            float swipeLength = endPos.x - this.startPos.x;
+            this.speed = swipeLength / 500.0f;
+
+            GetComponent<AudioSource>().Play();
         }
 
-        transform.Rotate(0, 0, rotSpeed);   // 회전 적용
-        rotSpeed *= 0.96f;                  // 자연 감속
+        transform.Translate(this.speed, 0, 0);
+        this.speed *= 0.98f;
     }
 }
